@@ -3,33 +3,35 @@ use fmt;
 use strings;
 use strconv;
 
+// Iterator should live as long as the decoder.
 export type Decoder = struct {
 	it: *strings::iterator,
 };
 
-// TODO: add list and dict
-// and find a better name
-export type Element = (str | int);
+// TODO: Add dict
+// TODO: Find a better name
+export type Element = (str | int | []Element);
 
 export fn decode(self: *Decoder) []Element = {
-	fmt::println("Decoding...")!;
 	let elements: []Element = [];
 
 	for (let ch => strings::next(self.it)) {
+		if (ch == 'e') {
+			break;
+		};
+
 		if (ascii::isdigit(ch)) {
 			append(elements, decode_string(self))!;
 		} else if (ch == 'i') {
 			append(elements, decode_number(self))!;
 		} else if (ch == 'l') {
-			decode_list(self);
+			append(elements, decode(self))!;
 		} else if (ch == 'd') {
-			decode_dict(self);
+			fmt::fatalf("TODO: Parsing dictionaries");
 		} else {
 			fmt::fatalf("[ERR]: Unexpected rune while decoding bencode '{}'", ch);
 		};
 	};
-	fmt::println("Done decoding...")!;
-
 	return elements;
 };
 
@@ -84,53 +86,41 @@ fn decode_string(self: *Decoder) Element = {
 	return value;
 };
 
-fn decode_list(self: *Decoder) void = {
-	// TODO:
-	fmt::println("[TODO]: Decode list")!;
-};
-
 fn decode_dict(self: *Decoder) void = {
 	// TODO:
 	fmt::println("[TODO]: Decode dict")!;
 };
 
-@test fn number_decoding()  void = {
-	let blob = "i5248219ei-4326e";
-	let it = strings::iter(blob);
-	let decoder = Decoder {
-		it = &it,
+fn equal(self: const []Element, other: const []Element) bool = {
+	if (len(self) != len(other)) {
+		return false;
 	};
 
-	let expected: []Element = [
-		5248219,
-		-4326
-	];
+	for (let i = 0z; i < len(self); i += 1) {
+		if (
+			(self[i] is []Element && !(other[i] is []Element)) ||
+			(self[i] is str && !(other[i] is str)) ||
+			(self[i] is int && !(other[i] is int))
+		) {
+			return false;
+		};
 
-	let elements = decode(&decoder);
-	assert(len(expected) == len(elements), "Invalid number of elements");
-
-	for (let i = 0z; i < len(elements); i += 1) {
-		assert(expected[i]: int == elements[i]: int);
+		if (self[i] is str) {
+			if (self[i]: str != other[i]: str) {
+				return false;
+			};
+		} else if (self[i] is int) {
+			if (self[i]: int != other[i]: int) {
+				return false;
+			};
+		} else if (self[i] is []Element) {
+			if (!equal(self[i]: []Element, other[i]: []Element)) {
+				return false;
+			};
+		} else {
+			assert(false, "There is a limited number of possible element types");
+		};
 	};
-};
 
-@test fn string_decoding()  void = {
-	let blob = "5:tests4:hare11:programming";
-	let it = strings::iter(blob);
-	let decoder = Decoder {
-		it = &it,
-	};
-
-	let expected: []Element = [
-		"tests",
-		"hare",
-		"programming"
-	];
-
-	let elements = decode(&decoder);
-	assert(len(expected) == len(elements), "Invalid number of elements");
-
-	for (let i = 0z; i < len(elements); i += 1) {
-		assert(expected[i]: str == elements[i]: str);
-	};
+	return true;
 };
