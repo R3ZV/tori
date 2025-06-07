@@ -9,7 +9,6 @@ export type Decoder = struct {
 };
 
 // TODO: Add dict
-// TODO: Find a better name
 export type Element = (str | int | []Element);
 
 export fn decode(self: *Decoder) []Element = {
