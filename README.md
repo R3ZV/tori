@@ -1,7 +1,5 @@
 # Tori
 
-A terminal BitTorrent protocol client written in Hare to test the language.
-
 BitTorrent is a peer-to-peer file sharing protocol used for distributing large
 amounts of data.
 
