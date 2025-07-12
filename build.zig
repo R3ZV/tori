@@ -28,6 +28,10 @@ pub fn build(b: *std.Build) void {
 
     const exe_tests = b.addTest(.{
         .root_module = exe.root_module,
+        .test_runner = .{
+            .path = b.path("./lib/runner.zig"),
+            .mode = .simple,
+        },
     });
 
     const run_exe_tests = b.addRunArtifact(exe_tests);

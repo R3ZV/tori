@@ -83,3 +83,40 @@ fn decode_str(self: *Self) !Type {
         .str = self.blob[start_idx .. self.pos + 1],
     };
 }
+
+test "decode number" {
+    const blobs: [3][]const u8 = .{
+        "i42e",
+        "i-42e",
+        "i0e",
+    };
+
+    const expected: [3]Type = .{
+        .{ .num = 42 },
+        .{ .num = -42 },
+        .{ .num = 0 },
+    };
+
+    const alloc = std.testing.allocator;
+    for (blobs, 0..) |blob, i| {
+        var bencoder = init(blob, alloc);
+        const result = try bencoder.run();
+        switch (result) {
+            TypeTag.str => |val| try std.testing.expectEqualSlices(u8, expected[i].str, val),
+            TypeTag.num => |val| try std.testing.expectEqual(expected[i].num, val),
+        }
+    }
+}
+
+// test "decode number errors" {
+//     const blobs: []const u8 = {
+//         "i-0e",
+//         "i0009284e",
+//         "i009284e",
+//         "i09284e",
+//         "if9284e",
+//         "i92f84e",
+//     };
+// }
+
+// test "decode strings" {}

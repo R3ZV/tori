@@ -48,3 +48,7 @@ pub fn main() !void {
     }
     try out.flush();
 }
+
+test {
+    _ = @import("decoder.zig");
+}
