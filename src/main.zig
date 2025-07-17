@@ -13,10 +13,8 @@ pub fn main() !void {
     var gpa = std.heap.GeneralPurposeAllocator(.{}){};
     const alloc = gpa.allocator();
 
-    var buffer: [256]u8 = undefined;
-    const stdout_file = std.fs.File.stdout();
-    var file_writer = stdout_file.writer(&buffer);
-    const out = &file_writer.interface;
+    const stdout_file = std.io.getStdOut();
+    var out = stdout_file.writer();
 
     const args = try std.process.argsAlloc(alloc);
     defer std.process.argsFree(alloc, args);
@@ -30,7 +28,6 @@ pub fn main() !void {
         if (args.len < 3) {
             try out.print("Invalid number of arguments!\n", .{});
             try out.print("Expected a bencoded blob!\n", .{});
-            try out.flush();
             return;
         }
         const blob = args[2];
@@ -46,7 +43,6 @@ pub fn main() !void {
         try out.print("Unsupported command!\n", .{});
         try out.print("Use 'tori help' for available commands!\n", .{});
     }
-    try out.flush();
 }
 
 test {
