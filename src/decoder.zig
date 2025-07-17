@@ -36,7 +36,6 @@ pub const DecoderError = error{
     NON_DIGIT_CHAR,
 
     // str errors
-    NEGATIVE_STR_LEN,
     NO_STR_SEP,
     UNEXPECTED_EOF,
 };
@@ -92,17 +91,12 @@ fn decode_num(self: *Self) !Type {
 }
 
 fn decode_str(self: *Self) !Type {
-    if (self.blob[self.pos] == '-') {
-        return DecoderError.NEGATIVE_STR_LEN;
-    }
-
     var start_idx: usize = self.pos;
     while (self.blob[self.pos] != ':') : (self.pos += 1) {
         if (!std.ascii.isDigit(self.blob[self.pos])) {
             return DecoderError.NO_STR_SEP;
         }
     }
-
 
     const str_len = try std.fmt.parseInt(usize, self.blob[start_idx..self.pos], 10);
 
@@ -163,23 +157,19 @@ test "decode number errors" {
 }
 
 test "decode strings" {
-    const blobs: [3][]const u8 = .{
-        "5:zeus",
-        "3:k8s",
-        "14:cotton eye joe"
-    };
+    const blobs: [3][]const u8 = .{ "4:zeus", "3:k8s", "14:cotton eye joe" };
 
     const expected: [3]Type = .{
-        .{.str = "zeus"},
-        .{.str = "k8s"},
-        .{.str = "cotton eye joe"},
+        .{ .str = "zeus" },
+        .{ .str = "k8s" },
+        .{ .str = "cotton eye joe" },
     };
 
     const alloc = std.testing.allocator;
     for (blobs, 0..) |blob, i| {
         var bencoder = init(blob, alloc);
         const result = try bencoder.run();
-        switch(result) {
+        switch (result) {
             TypeTag.num => unreachable,
             TypeTag.str => |got| try std.testing.expectEqualSlices(u8, expected[i].str, got),
         }
@@ -187,5 +177,16 @@ test "decode strings" {
 }
 
 test "decode strings errors" {
-    return error.SkipZigTest;
+    const blobs: [2][]const u8 = .{
+        "5:zeus",
+        "5tests",
+    };
+    const expected: [2]DecoderError = .{ DecoderError.UNEXPECTED_EOF, DecoderError.NO_STR_SEP };
+
+    const alloc = std.testing.allocator;
+    for (blobs, 0..) |blob, i| {
+        var bencoder = init(blob, alloc);
+        const result = bencoder.run();
+        try std.testing.expectError(expected[i], result);
+    }
 }

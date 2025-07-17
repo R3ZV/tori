@@ -77,7 +77,9 @@ pub fn main() !void {
         }
     }
 
-    try out.print("\n", .{});
+    if (skipped > 0) {
+        try out.print("\n", .{});
+    }
     for (0..total_tests) |i| {
         const t = results[i];
         switch (t.status) {
@@ -90,7 +92,9 @@ pub fn main() !void {
         }
     }
 
-    try out.print("\n", .{});
+    if (failed > 0) {
+        try out.print("\n", .{});
+    }
     for (0..total_tests) |i| {
         const t = results[i];
         switch (t.status) {
