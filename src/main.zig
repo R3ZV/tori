@@ -14,21 +14,25 @@ pub fn main() !void {
     const alloc = gpa.allocator();
 
     const args = try std.process.argsAlloc(alloc);
+    var writer = std.fs.File.stdout().writer(&.{});
+    const stdout = &writer.interface;
 
     if (args.len < 2) {
-        std.debug.print("Invalid number of arguments!\n", .{});
-        std.debug.print("Use 'tori help' for more information\n", .{});
+        try stdout.print("Invalid number of arguments!\n", .{});
+        try stdout.print("Use 'tori help' for more information\n", .{});
+        try stdout.flush();
         return;
     }
 
     const command: []const u8 = args[1];
 
     if (std.mem.eql(u8, "help", command)) {
-        std.debug.print("{s}\n", .{usage});
+        try stdout.print("{s}\n", .{usage});
     } else if (std.mem.eql(u8, "decode", command)) {
         if (args.len < 3) {
-            std.debug.print("Expected a bencoded string but none was found!\n", .{});
-            std.debug.print("Use 'tori help' for more information\n", .{});
+            try stdout.print("Expected a bencoded string but none was found!\n", .{});
+            try stdout.print("Use 'tori help' for more information\n", .{});
+            try stdout.flush();
             return;
         }
 
@@ -37,12 +41,13 @@ pub fn main() !void {
 
         const value = try bencoder.run();
         switch (value) {
-            .str => |val| std.debug.print("{s}\n", .{val}),
-            .number => |val| std.debug.print("{}\n", .{val}),
+            .str => |val| try stdout.print("{s}\n", .{val}),
+            .number => |val| try stdout.print("{}\n", .{val}),
         }
     } else {
-        std.debug.print("Invalid command\n", .{});
-        std.debug.print("Use 'tori help'\n", .{});
+        try stdout.print("Invalid command\n", .{});
+        try stdout.print("Use 'tori help'\n", .{});
+        try stdout.flush();
     }
 
 }
