@@ -14,7 +14,9 @@ pub fn main() !void {
     const alloc = gpa.allocator();
 
     const args = try std.process.argsAlloc(alloc);
-    var writer = std.fs.File.stdout().writer(&.{});
+
+    var buff: [256]u8 = undefined;
+    var writer = std.fs.File.stdout().writer(&buff);
     const stdout = &writer.interface;
 
     if (args.len < 2) {
@@ -39,16 +41,30 @@ pub fn main() !void {
         const blob = args[2];
         var bencoder = decoder.init(blob, alloc);
 
-        const value = try bencoder.run();
-        switch (value) {
-            .str => |val| try stdout.print("{s}\n", .{val}),
-            .number => |val| try stdout.print("{}\n", .{val}),
+        const res = bencoder.run();
+        if (res) |value| {
+            try decoder.print(&value, stdout);
+        } else |err| switch(err) {
+            decoder.Error.empty_root => try stdout.print("Empty root blob provided!\n", .{}),
+            decoder.Error.invalid_number => try stdout.print("One of the provided number is invalid!\n", .{}),
+            decoder.Error.invalid_root => {
+                try stdout.print("Invalid root provided!\n", .{});
+                try stdout.print("Expected one of the following:\n", .{});
+                try stdout.print("1. number         i.e. i42e           -> 42\n", .{});
+                try stdout.print("2. string         i.e. 4:tori         -> tori\n", .{});
+                try stdout.print("3. list           i.e. li42e          -> [42]\n", .{});
+                try stdout.print("4. dictionary     i.e. d4:toii42e    -> [tori: 42]\n", .{});
+            },
+            else => try stdout.print("Error: {}\n", .{err}),
         }
     } else {
         try stdout.print("Invalid command\n", .{});
         try stdout.print("Use 'tori help'\n", .{});
         try stdout.flush();
+
     }
+
+    try stdout.flush();
 
 }
 
