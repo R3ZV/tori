@@ -14,6 +14,7 @@ pub fn main() !void {
     const alloc = gpa.allocator();
 
     const args = try std.process.argsAlloc(alloc);
+
     var buff: [256]u8 = undefined;
     var writer = std.fs.File.stdout().writer(&buff);
     const stdout = &writer.interface;
@@ -59,6 +60,8 @@ pub fn main() !void {
     } else {
         try stdout.print("Invalid command\n", .{});
         try stdout.print("Use 'tori help'\n", .{});
+        try stdout.flush();
+
     }
 
     try stdout.flush();
