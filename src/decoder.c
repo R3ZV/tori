@@ -1,0 +1,90 @@
+#include <string.h>
+
+#include "decoder.h"
+#include "macros.h"
+
+Decoder
+decoder_init(char const *const blob) {
+    return (Decoder) {
+        .blob = blob,
+        .it = 0,
+    };
+}
+
+internal bool
+is_digit(char ch) {
+    return '0' <= ch && ch <= '9';
+}
+
+[[nodiscard]] internal DecoderErr
+decode_number(Decoder *const self, i32* res) {
+    *res = 0;
+    bool is_negative = false;
+
+    // skip 'i'
+    self->it++;
+
+    char curr = self->blob[self->it];
+    if (self->it < strlen(self->blob) && curr == '-') {
+        is_negative = true;
+        self->it++;
+    }
+
+    while (self->it < strlen(self->blob)) {
+        curr = self->blob[self->it];
+        if (curr == 'e') {
+            break;
+        }
+
+        if (!is_digit(curr)) {
+            *res = 0;
+            return DECODER_NON_DIGIT;
+        }
+        *res = *res * 10 + (curr - '0');
+        self->it++;
+    }
+
+    // skip 'e'
+    self->it++;
+    if (is_negative) {
+        *res *= -1;
+    }
+
+    return DECODER_NULL;
+}
+
+[[nodiscard]] DecoderErr
+decoder_run(Decoder *const self, BencodeValue* res) {
+    if (strlen(self->blob) == 0 || strlen(self->blob) <= self->it) {
+        return DECODER_NULL_ROOT;
+    }
+
+    char const curr = self->blob[self->it];
+    if (curr == 'i') {
+        res->type = BENCODE_INT;
+        return decode_number(self, &res->val.num);
+    } else if (curr == 'l') {
+        todo("list decoding");
+    } else if (curr == 'd') {
+        todo("dict decoding");
+    } else if (is_digit(curr)) {
+        todo("string decoding");
+    }
+
+    return DECODER_INVALID_TYPE;
+}
+
+char *
+decoder_err_msg(DecoderErr const err) {
+    switch(err) {
+        case DECODER_NULL_ROOT:
+            return "Empty bencode string found!";
+        case DECODER_INVALID_TYPE:
+            return "Given bencode contains invalid type!";
+        case DECODER_NON_DIGIT:
+            return "Found bencode int that contains non digits!";
+        case DECODER_NULL:
+            return "NO ERROR";
+    }
+    return "NO ERROR";
+}

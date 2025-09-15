@@ -1,7 +1,3 @@
-zig-out
-.zig-cache
-
-
-# Added by cargo
-
-/target
+build
+test
+tori
