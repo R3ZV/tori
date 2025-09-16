@@ -7,11 +7,15 @@ typedef enum {
     DECODER_NULL_ROOT,
     DECODER_INVALID_TYPE,
     DECODER_NON_DIGIT,
+    DECODER_MISSING_TERMINATOR,
     DECODER_NULL,
 } DecoderErr;
 
 char *
 decoder_err_msg(DecoderErr const err);
+
+char *
+decoder_enum_str(DecoderErr const err);
 
 typedef struct {
     char const *const blob;

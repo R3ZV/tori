@@ -4,20 +4,21 @@ TARGET  := tori
 
 SRCDIR  := src
 BUILDDIR:= build
+BINDIR  := bin
 
 CFILES  := $(wildcard $(SRCDIR)/*.c)
 CTESTFILES  := $(wildcard tests/*.c)
 OBJS    := $(patsubst $(SRCDIR)/%.c,$(BUILDDIR)/%.o,$(CFILES))
 
 run: $(TARGET)
-	./$(TARGET) $(ARGS)
+	./$(BINDIR)/$(TARGET) $(ARGS)
 
 test: $(OBJS)
-	$(CC) $(CTESTFILES) $(OBJS) -o $@
-	./test
+	$(CC) $(CTESTFILES) $(OBJS) -o $(BINDIR)/$@
+	./$(BINDIR)/test
 
-$(TARGET): $(OBJS)
-	$(CC) cmd/tori/main.c $(OBJS) -o $@
+$(TARGET): $(OBJS) | $(BINDIR)
+	$(CC) cmd/tori/main.c $(OBJS) -o $(BINDIR)/$@
 
 $(BUILDDIR)/%.o: $(SRCDIR)/%.c | $(BUILDDIR)
 	$(CC) $(CFLAGS) -c $< -o $@
@@ -25,7 +26,8 @@ $(BUILDDIR)/%.o: $(SRCDIR)/%.c | $(BUILDDIR)
 $(BUILDDIR):
 	mkdir -p $(BUILDDIR)
 
-clean:
-	rm -rf $(BUILDDIR) $(TARGET) test
+$(BINDIR):
+	mkdir -p $(BINDIR)
 
-.PHONY: tori test
+clean:
+	rm -rf $(BUILDDIR) $(BINDIR)

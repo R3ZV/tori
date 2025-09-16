@@ -19,12 +19,11 @@ is_digit(char ch) {
 [[nodiscard]] internal DecoderErr
 decode_number(Decoder *const self, i32* res) {
     *res = 0;
-    bool is_negative = false;
-
     // skip 'i'
     self->it++;
 
     char curr = self->blob[self->it];
+    bool is_negative = false;
     if (self->it < strlen(self->blob) && curr == '-') {
         is_negative = true;
         self->it++;
@@ -42,6 +41,15 @@ decode_number(Decoder *const self, i32* res) {
         }
         *res = *res * 10 + (curr - '0');
         self->it++;
+    }
+
+    if (self->it >= strlen(self->blob)) {
+        return DECODER_MISSING_TERMINATOR;
+    }
+
+    curr = self->blob[self->it];
+    if (curr != 'e') {
+        return DECODER_MISSING_TERMINATOR;
     }
 
     // skip 'e'
@@ -77,6 +85,8 @@ decoder_run(Decoder *const self, BencodeValue* res) {
 char *
 decoder_err_msg(DecoderErr const err) {
     switch(err) {
+        case DECODER_MISSING_TERMINATOR:
+            return "Found bencoded value with missing 'e' terminator!";
         case DECODER_NULL_ROOT:
             return "Empty bencode string found!";
         case DECODER_INVALID_TYPE:
@@ -86,5 +96,22 @@ decoder_err_msg(DecoderErr const err) {
         case DECODER_NULL:
             return "NO ERROR";
     }
-    return "NO ERROR";
+    unreachable();
+}
+
+char *
+decoder_enum_str(DecoderErr const err) {
+    switch(err) {
+        case DECODER_MISSING_TERMINATOR:
+            return "DECODER_MISSING_TERMINATOR";
+        case DECODER_NULL_ROOT:
+            return "DECODER_NULL_ROOT";
+        case DECODER_INVALID_TYPE:
+            return "DECODER_INVALID_TYPE";
+        case DECODER_NON_DIGIT:
+            return "DECODER_NON_DIGIT";
+        case DECODER_NULL:
+            return "DECODER_NULL";
+    }
+    unreachable();
 }
