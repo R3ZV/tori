@@ -2,9 +2,9 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "../src/decoder.h"
 #include "all_tests.h"
-#include "../src/macros.h"
+#include "../lib/macros.h"
+#include "../src/decoder.h"
 
 char*
 decoder_number_decoding_test() {

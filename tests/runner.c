@@ -2,7 +2,7 @@
 #include <time.h>
 #include <string.h>
 
-#include "../src/types.h"
+#include "../lib/types.h"
 #include "all_tests.h"
 
 char const *const PASS_COLOR = "\x1b[32m";

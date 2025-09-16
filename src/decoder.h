@@ -1,6 +1,6 @@
 #pragma once
 
-#include "types.h"
+#include "../lib/types.h"
 #include "bencode.h"
 
 typedef enum {
