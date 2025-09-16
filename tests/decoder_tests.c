@@ -14,7 +14,6 @@ decoder_number_decoding_test() {
         "i248832e"
     };
 
-
     int expected[3] = { 42, -42, 248832 };
     for (size_t i = 0; i < 3; i++) {
         Decoder dec = decoder_init(blobs[i]);
@@ -45,7 +44,6 @@ decoder_number_decoding_errs() {
         "i-42",
     };
 
-
     DecoderErr expected[2] = { DECODER_NON_DIGIT, DECODER_MISSING_TERMINATOR };
     for (size_t i = 0; i < 2; i++) {
         Decoder dec = decoder_init(blobs[i]);
@@ -74,7 +72,6 @@ decoder_misc_errs() {
         "",
         "u32",
     };
-
 
     DecoderErr expected[2] = { DECODER_NULL_ROOT, DECODER_INVALID_TYPE };
     for (size_t i = 0; i < 2; i++) {
@@ -136,7 +133,6 @@ decoder_str_decoding_errs() {
         "4f:test",
         "9:test",
     };
-
 
     DecoderErr expected[3] = { DECODER_MISSING_COLUMN, DECODER_MISSING_COLUMN, DECODER_UNEXPECTED_EOF };
     for (size_t i = 0; i < 3; i++) {

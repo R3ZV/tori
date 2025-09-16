@@ -1,7 +1,7 @@
 #include <string.h>
 
 #include "decoder.h"
-#include "macros.h"
+#include "../lib/macros.h"
 
 Decoder
 decoder_init(char const *const blob) {
@@ -108,12 +108,6 @@ decoder_run(Decoder *const self, BencodeValue* res) {
         return err;
     }
 
-    // res = char* which means the address in memory of a char
-    // what is a string in C
-    // it is the start of a contigous sequence of chars which ends
-    // when a \0 is found
-    // so when we have a "string" we only care about the address of the first
-    // char
     return DECODER_INVALID_TYPE;
 }
 
