@@ -52,6 +52,8 @@ main(void) {
     run_test(decoder_number_decoding_test);
     run_test(decoder_number_decoding_errs);
     run_test(decoder_misc_errs);
+    run_test(decoder_str_decoding_test);
+    run_test(decoder_str_decoding_errs);
 
     u32 total_tests = passed + failed;
     printf("%s%d%s passed; %s%d%s failed; %d completed in %fs\n",

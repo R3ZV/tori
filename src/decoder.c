@@ -22,7 +22,7 @@ decode_str(Decoder *const self, char** res) {
     while (self->it < strlen(self->blob) && self->blob[self->it] != ':') {
         char curr = self->blob[self->it];
         if (!is_digit(curr)) {
-            return DECODER_INVALID_LENGTH;
+            return DECODER_MISSING_COLUMN;
         }
         len = len * 10 + (size_t)(curr - '0');
         self->it++;
@@ -30,10 +30,6 @@ decode_str(Decoder *const self, char** res) {
 
     if (self->it >= strlen(self->blob)) {
         return DECODER_UNEXPECTED_EOF;
-    }
-
-    if (self->blob[self->it] != ':') {
-        return DECODER_MISSING_COLUMN;
     }
 
     // skip ':'
@@ -124,8 +120,6 @@ decoder_run(Decoder *const self, BencodeValue* res) {
 char *
 decoder_err_msg(DecoderErr const err) {
     switch(err) {
-        case DECODER_INVALID_LENGTH:
-            return "String length is invalid!";
         case DECODER_UNEXPECTED_EOF:
             return "Bencoded string ended earlier!";
         case DECODER_MISSING_COLUMN:
@@ -147,8 +141,6 @@ decoder_err_msg(DecoderErr const err) {
 char *
 decoder_enum_str(DecoderErr const err) {
     switch(err) {
-        case DECODER_INVALID_LENGTH:
-            return "DECODER_INVALID_LENGTH";
         case DECODER_UNEXPECTED_EOF:
             return "DECODER_UNEXPECTED_EOF";
         case DECODER_MISSING_COLUMN:

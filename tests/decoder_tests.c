@@ -1,9 +1,10 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 
 #include "../src/decoder.h"
 #include "all_tests.h"
-
+#include "../src/macros.h"
 
 char*
 decoder_number_decoding_test() {
@@ -77,6 +78,68 @@ decoder_misc_errs() {
 
     DecoderErr expected[2] = { DECODER_NULL_ROOT, DECODER_INVALID_TYPE };
     for (size_t i = 0; i < 2; i++) {
+        Decoder dec = decoder_init(blobs[i]);
+        BencodeValue res = {};
+        DecoderErr err = decoder_run(&dec, &res);
+        if (err == DECODER_NULL) {
+            return "Expected decoding to result in an error!";
+        }
+
+        if (err != expected[i]) {
+            char* err_msg = calloc(1024, sizeof(char));
+            sprintf(err_msg, "Expected error '%s' but got '%s'\n",
+                    decoder_enum_str(expected[i]),
+                    decoder_enum_str(err)
+            );
+            return err_msg;
+        }
+    }
+
+    return NULL;
+}
+
+char*
+decoder_str_decoding_test() {
+    char* blobs[3] = {
+        "0:",
+        "4:test",
+        "9:cmuratori",
+    };
+
+    char* expected[3] = {"", "test", "cmuratori" };
+    for (size_t i = 0; i < 3; i++) {
+        Decoder dec = decoder_init(blobs[i]);
+        BencodeValue res = {};
+        DecoderErr err = decoder_run(&dec, &res);
+        if (err != DECODER_NULL) {
+            return decoder_err_msg(err);
+        }
+
+        if (res.type != BENCODE_STR) {
+            return "Expected result to be of type STR!";
+        }
+
+        if (strcmp(res.val.str, expected[i]) != 0) {
+            char* err_msg = calloc(1024, sizeof(char));
+            sprintf(err_msg, "Expected result to be '%s' but found '%s'\n", expected[i], res.val.str);
+            return err_msg;
+        }
+    }
+
+    return NULL;
+}
+
+char*
+decoder_str_decoding_errs() {
+    char* blobs[3] = {
+        "4test",
+        "4f:test",
+        "9:test",
+    };
+
+
+    DecoderErr expected[3] = { DECODER_MISSING_COLUMN, DECODER_MISSING_COLUMN, DECODER_UNEXPECTED_EOF };
+    for (size_t i = 0; i < 3; i++) {
         Decoder dec = decoder_init(blobs[i]);
         BencodeValue res = {};
         DecoderErr err = decoder_run(&dec, &res);
