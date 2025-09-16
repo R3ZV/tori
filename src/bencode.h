@@ -9,7 +9,7 @@ typedef enum {
 
 typedef union {
     i32 num;
-    char *str;
+    char* str;
 } BencodeElement;
 
 typedef struct {
@@ -18,4 +18,4 @@ typedef struct {
 } BencodeValue;
 
 void
-bencode_print(BencodeValue const* const val);
+bencode_print(BencodeValue const *const val);

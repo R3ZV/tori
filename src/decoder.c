@@ -17,6 +17,37 @@ is_digit(char ch) {
 }
 
 [[nodiscard]] internal DecoderErr
+decode_str(Decoder *const self, char** res) {
+    size_t len = 0;
+    while (self->it < strlen(self->blob) && self->blob[self->it] != ':') {
+        char curr = self->blob[self->it];
+        if (!is_digit(curr)) {
+            return DECODER_INVALID_LENGTH;
+        }
+        len = len * 10 + (size_t)(curr - '0');
+        self->it++;
+    }
+
+    if (self->it >= strlen(self->blob)) {
+        return DECODER_UNEXPECTED_EOF;
+    }
+
+    if (self->blob[self->it] != ':') {
+        return DECODER_MISSING_COLUMN;
+    }
+
+    // skip ':'
+    self->it++;
+    if (self->it + len - 1 > strlen(self->blob)) {
+        return DECODER_UNEXPECTED_EOF;
+    }
+
+    *res = calloc(len, sizeof(char));
+    strncpy(*res, &self->blob[self->it], len);
+    return DECODER_NULL;
+}
+
+[[nodiscard]] internal DecoderErr
 decode_number(Decoder *const self, i32* res) {
     *res = 0;
     // skip 'i'
@@ -76,15 +107,29 @@ decoder_run(Decoder *const self, BencodeValue* res) {
     } else if (curr == 'd') {
         todo("dict decoding");
     } else if (is_digit(curr)) {
-        todo("string decoding");
+        res->type = BENCODE_STR;
+        DecoderErr err = decode_str(self, &(res->val.str));
+        return err;
     }
 
+    // res = char* which means the address in memory of a char
+    // what is a string in C
+    // it is the start of a contigous sequence of chars which ends
+    // when a \0 is found
+    // so when we have a "string" we only care about the address of the first
+    // char
     return DECODER_INVALID_TYPE;
 }
 
 char *
 decoder_err_msg(DecoderErr const err) {
     switch(err) {
+        case DECODER_INVALID_LENGTH:
+            return "String length is invalid!";
+        case DECODER_UNEXPECTED_EOF:
+            return "Bencoded string ended earlier!";
+        case DECODER_MISSING_COLUMN:
+            return "Bencoded string misses ':' separator!";
         case DECODER_MISSING_TERMINATOR:
             return "Found bencoded value with missing 'e' terminator!";
         case DECODER_NULL_ROOT:
@@ -102,6 +147,12 @@ decoder_err_msg(DecoderErr const err) {
 char *
 decoder_enum_str(DecoderErr const err) {
     switch(err) {
+        case DECODER_INVALID_LENGTH:
+            return "DECODER_INVALID_LENGTH";
+        case DECODER_UNEXPECTED_EOF:
+            return "DECODER_UNEXPECTED_EOF";
+        case DECODER_MISSING_COLUMN:
+            return "DECODER_MISSING_COLUMN";
         case DECODER_MISSING_TERMINATOR:
             return "DECODER_MISSING_TERMINATOR";
         case DECODER_NULL_ROOT:

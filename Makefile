@@ -1,5 +1,33 @@
 CC      := gcc
-CFLAGS  := -std=c23 -Wall -Wextra -O2
+CFLAGS_WARNINGS := \
+    -std=c23 \
+    -pedantic \
+    -Wall \
+    -Wextra \
+    -Werror \
+    -Wshadow \
+    -Wconversion \
+    -Wsign-conversion \
+    -Wformat=2 \
+    -Wnull-dereference \
+    -fstack-protector-strong \
+    -D_FORTIFY_SOURCE=2 \
+
+CFLAGS_DEBUG := \
+    -O2 \
+    -g \
+
+CFLAGS_RELEASE := \
+    -O2 \
+    -DNDEBUG
+
+BUILD ?= debug
+ifeq ($(BUILD),release)
+    CFLAGS := $(CFLAGS_WARNINGS) $(CFLAGS_RELEASE)
+else
+    CFLAGS := $(CFLAGS_WARNINGS) $(CFLAGS_DEBUG)
+endif
+
 TARGET  := tori
 
 SRCDIR  := src

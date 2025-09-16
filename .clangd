@@ -1,0 +1,16 @@
+CompileFlags:
+  Add: [
+    "-std=c23",
+    "-pedantic",
+    "-Wall",
+    "-Wextra",
+    "-Werror",
+    "-Wshadow",
+    "-Wconversion",
+    "-Wsign-conversion",
+    "-Wformat=2",
+    "-Wnull-dereference",
+    "-fstack-protector-strong",
+    "-D_FORTIFY_SOURCE=2",
+  ]
+
