@@ -36,3 +36,6 @@ arrayl_get(ArrayList const *const self, size_t pos);
 
 void
 bencode_print(BencodeValue const *const val);
+
+void
+bencode_free(BencodeValue* self);

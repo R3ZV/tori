@@ -5,7 +5,6 @@
 
 #include "../../src/decoder.h"
 
-
 void
 print_help() {
     printf("Usage: tori <COMMAND>\n");
@@ -39,10 +38,12 @@ main(int argc, char** argv) {
         DecoderErr err = decoder_run(&dec, res);
         if (err != DECODER_NULL) {
             printf("%s\n", decoder_err_msg(err));
+            bencode_free(res);
             return EXIT_FAILURE;
         }
 
         bencode_print(res);
+        bencode_free(res);
     } else {
         printf("Invalid command!\n");
         printf("Use: tori 'help'\n");

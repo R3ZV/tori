@@ -38,8 +38,9 @@ decode_str(Decoder *const self, char** res) {
         return DECODER_UNEXPECTED_EOF;
     }
 
-    *res = calloc(len, sizeof(char));
+    *res = calloc(len + 1, sizeof(char));
     strncpy(*res, &self->blob[self->it], len);
+    (*res)[len] = '\0';
     self->it += len;
     return DECODER_NULL;
 }
@@ -100,6 +101,8 @@ decoder_run(Decoder *const self, BencodeValue* res) {
         res->type = BENCODE_INT;
         return decode_number(self, &res->val.num);
     } else if (curr == 'l') {
+        res->type = BENCODE_LIST;
+
         // skip 'l'
         self->it++;
 
@@ -109,6 +112,8 @@ decoder_run(Decoder *const self, BencodeValue* res) {
             BencodeValue* elem = calloc(1, sizeof(BencodeValue));
             DecoderErr err = decoder_run(self, elem);
             if (err != DECODER_NULL) {
+                free(elem);
+                res->val.list = elems;
                 return err;
             }
             arrayl_append(elems, elem);
