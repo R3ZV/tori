@@ -40,6 +40,7 @@ decode_str(Decoder *const self, char** res) {
 
     *res = calloc(len, sizeof(char));
     strncpy(*res, &self->blob[self->it], len);
+    self->it += len;
     return DECODER_NULL;
 }
 
@@ -99,7 +100,22 @@ decoder_run(Decoder *const self, BencodeValue* res) {
         res->type = BENCODE_INT;
         return decode_number(self, &res->val.num);
     } else if (curr == 'l') {
-        todo("list decoding");
+        // skip 'l'
+        self->it++;
+
+        ArrayList* elems = calloc(1, sizeof(ArrayList));
+        *elems = arrayl_init();
+        while (self->it < strlen(self->blob) && self->blob[self->it] != 'e') {
+            BencodeValue* elem = calloc(1, sizeof(BencodeValue));
+            DecoderErr err = decoder_run(self, elem);
+            if (err != DECODER_NULL) {
+                return err;
+            }
+            arrayl_append(elems, elem);
+        }
+        res->type = BENCODE_LIST;
+        res->val.list = elems;
+        return DECODER_NULL;
     } else if (curr == 'd') {
         todo("dict decoding");
     } else if (is_digit(curr)) {
