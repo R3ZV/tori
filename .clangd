@@ -1,6 +1,7 @@
 CompileFlags:
   Add: [
     "-std=c23",
+    "-O2",
     "-pedantic",
     "-Wall",
     "-Wextra",
@@ -13,4 +14,3 @@ CompileFlags:
     "-fstack-protector-strong",
     "-D_FORTIFY_SOURCE=2",
   ]
-

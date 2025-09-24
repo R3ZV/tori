@@ -54,6 +54,46 @@ arrayl_get(ArrayList const *const self, size_t pos) {
    return self->items[pos];
 }
 
+char*
+arrayl_eql(ArrayList const *const self, ArrayList const *const other) {
+    if (self->len != other->len) {
+        char* err_msg = calloc(1024, sizeof(char));
+        sprintf(err_msg, "Self has len '%ld' but other has len '%ld'\n", self->len, other->len);
+        return err_msg;
+    }
+
+    for (size_t i = 0; i < self->len; i++) {
+        BencodeValue self_bv = *self->items[i];
+        BencodeValue other_bv = *other->items[i];
+
+        if (self_bv.type != other_bv.type) {
+            char* err_msg = calloc(1024, sizeof(char));
+            sprintf(err_msg, "[%ld]: Self has type '%d' but other has type '%d'\n", i, self_bv.type, other_bv.type);
+            return err_msg;
+        }
+
+        switch(self_bv.type) {
+            case BENCODE_INT:
+                if (self_bv.val.num != other_bv.val.num) {
+                    char* err_msg = calloc(1024, sizeof(char));
+                    sprintf(err_msg, "[%ld]: Self has value '%d' but other has value '%d'\n", i, self_bv.val.num, other_bv.val.num);
+                    return err_msg;
+                }
+                break;
+            case BENCODE_STR:
+                if (strcmp(self_bv.val.str, other_bv.val.str) != 0) {
+                    char* err_msg = calloc(1024, sizeof(char));
+                    sprintf(err_msg, "[%ld]: Self has value '%s' but other has value '%s'\n", i, self_bv.val.str, other_bv.val.str);
+                    return err_msg;
+                }
+                break;
+            case BENCODE_LIST:
+                return arrayl_eql(self_bv.val.list, other_bv.val.list);
+        }
+    }
+    return NULL;
+}
+
 void
 bencode_free(BencodeValue* self) {
     switch(self->type) {
@@ -72,7 +112,6 @@ bencode_free(BencodeValue* self) {
                 }
                 free(list->items);
                 free(list);
-                printf("Free list\n");
             }
             break;
     }

@@ -15,3 +15,6 @@ decoder_str_decoding_errs();
 
 char*
 decoder_misc_errs();
+
+char*
+decoder_list_decoding_test();

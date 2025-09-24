@@ -1,0 +1,17 @@
+.{
+    .name = .tori,
+    .version = "0.0.0",
+    .fingerprint = 0xaff5a642aa39ebcd, // Changing this has security and trust implications.
+    .minimum_zig_version = "0.15.1",
+    .dependencies = .{
+    },
+    .paths = .{
+        "build.zig",
+        "build.zig.zon",
+        "src",
+        "lib",
+        "cmd",
+        "LICENSE",
+        "README.md",
+    },
+}

@@ -1,6 +1,6 @@
 #include <stdio.h>
-#include <time.h>
 #include <string.h>
+#include <time.h>
 
 #include "../lib/types.h"
 #include "all_tests.h"
@@ -10,15 +10,15 @@ char const *const FAIL_COLOR = "\x1b[31m";
 char const *const SKIP_COLOR = "\x1b[35m";
 char const *const RESET_COLOR = "\x1b[0m";
 char const *const CLEAN_START = "\r\x1b[0K";
-char const *const FILLER = "................................................";
 
-#define MAX_NAME_LEN 80
+#define MAX_NAME_LEN 50
 
 #define run_test(test_fn) do { \
+    timespec_get(&start, TIME_UTC); \
     err_msg = test_fn(); \
-    clock_gettime(CLOCK_MONOTONIC, &end); \
-    elapsed = (end.tv_sec - start.tv_sec) + \
-                     (end.tv_nsec - start.tv_nsec) / 1e9; \
+    timespec_get(&end, TIME_UTC); \
+    elapsed = (double)(end.tv_sec - start.tv_sec) + \
+                     (double)(end.tv_nsec - start.tv_nsec) / 1e9; \
     total_elapsed += elapsed;\
     int name_len = strlen(#test_fn); \
     int dots = MAX_NAME_LEN - name_len; \
@@ -43,8 +43,6 @@ char const *const FILLER = "................................................";
 int
 main(void) {
     struct timespec start, end;
-    clock_gettime(CLOCK_MONOTONIC, &start);
-
     u32 passed = 0, failed = 0;
     char *err_msg = NULL;
     double elapsed = 0.0, total_elapsed = 0.0;
@@ -54,6 +52,7 @@ main(void) {
     run_test(decoder_misc_errs);
     run_test(decoder_str_decoding_test);
     run_test(decoder_str_decoding_errs);
+    run_test(decoder_list_decoding_test);
 
     u32 total_tests = passed + failed;
     printf("%s%d%s passed; %s%d%s failed; %d completed in %fs\n",
